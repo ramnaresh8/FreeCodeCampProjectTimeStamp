@@ -8,55 +8,51 @@ var app = express();
 // enable CORS (https://en.wikipedia.org/wiki/Cross-origin_resource_sharing)
 // so that your API is remotely testable by FCC 
 var cors = require('cors');
-app.use(cors({optionsSuccessStatus: 200}));  // some legacy browsers choke on 204
+app.use(cors({ optionsSuccessStatus: 200 }));  // some legacy browsers choke on 204
 
 // http://expressjs.com/en/starter/static-files.html
 app.use(express.static('public'));
 
 // http://expressjs.com/en/starter/basic-routing.html
-app.get("/", function (req, res) {
+app.get("/", function(req, res) {
   res.sendFile(__dirname + '/views/index.html');
 });
 
-
 // your first API endpoint... 
-app.get("/api/hello", function (req, res) {
-  res.json({greeting: 'hello API'});
+app.get("/api/hello", function(req, res) {
+  // console.log(24); // works
+  res.json({ greeting: 'hello API' });
 });
 
-app.get('apiOLD/:date_string?', (req, res) => {
-
-  const { date_string } = req.params; //user's input
+app.get('/apiOLD/:date_string?', (req, res) => {
+  // console.log(30); // this is visited if i press at api/timestamp/1451001600000 and sends {"error":"Invalid Date"}
+  const { date_string } = req.params; // user’s input
 
   let dateLocal;
   // make valid date
-  if (date_string == null)
+  if (date_string == null)  // null or undefined
     dateLocal = new Date();
-  else 
+  else
     dateLocal = new Date(parseInt(date_string));
 
-    const date = new Date(dateLocal.getTime() + 
-    (dateLocal.getTimezoneOffset() * 60000)); //GMT date time
+  const date = new Date(dateLocal.getTime() + (dateLocal.getTimezoneOffset() * 60000)); // GMT date time
 
-    //console.log('date_string = ' + date_string);
+  // console.log('date_string = ' + date_string);
 
-    // if date is not valid
-    if (date.toString() == 'Invalid Date') {
-      res.json({ "error": "Invalid Date"})
-    }
-
-    // if date is valid
-    if (typeof (parseInt(date_string === 'Number')) && 
-  date.toString().length <= 16) {
-    res.json({
-      unix: new Date(parseInt(date_string)).getTime(),
-      utc: new
-  Date(parseInt(date_string)).toUTCString()
-    })
+  // if date is not valid
+  if (date.toString() === 'Invalid Date') {
+    res.json({ "error": "Invalid Date" })
   }
 
+  // if date is valid
+  if (typeof (parseInt(date_string === 'Number')) && date.toString().length <= 16) {
+    res.json({
+      unix: new Date(parseInt(date_string)).getTime(),
+      utc: new Date(parseInt(date_string)).toUTCString()
+    })
+  }
   if (date) {
-    //user input is yyyy-mm-dd
+    // user input is yyyy-mm-dd
     res.json({
       unix: new Date(date).getTime(),
       utc: new Date(date).toUTCString()
@@ -64,13 +60,13 @@ app.get('apiOLD/:date_string?', (req, res) => {
   }
 });
 
+
 app.get("/api/:date?", (req, res) => {
   const dateString = req.params.date || "";
   let date;
 
-  if(!dateString || dateString == null || dateString ==""){
-    // If date parameter is empty or null or probably not needit: || dateString == "
-    //date = new Date();
+  if (!dateString || dateString == null || dateString == "") { // If date parameter is empty or null. probably not needet:  || dateString == ""
+    // date = new Date();
     const now = new Date();
     // date = now.toGMTString();
     date = now;
@@ -81,43 +77,47 @@ app.get("/api/:date?", (req, res) => {
       date = new Date(parseInt(dateString));
     else
       date = new Date(dateString);
+    // date = new Date(dateString.getTime() + (dateString.getTimezoneOffset() * 60000)); // GMT date time
+    console.log('dateString = ' + dateString);
 
-      //date = new Date(dateString.getTime() + (dateString.getTimeXoneOffset() * 60000));
-      // GMT date time
-      console.log('dateString = ' + dateString);
-
-      if(isNaN(date.getTime())) {
-        // if date is invalid
-        res.json({
-          error: "Invalid Date"
-        });
-        return;
-      }
+    if (isNaN(date.getTime())) { // If the date is invalid
+      res.json({
+        error: "Invalid Date"
+      });
+      return;
+    }
   }
 
-    res.json({
-      unix: date.getTime(),
-      utc: date.toUTCString()
-    });
+  res.json({
+    unix: date.getTime(),
+    utc: date.toUTCString()
+  });
 });
 
-app.get('/api/apiOLD/:date?', (req, res) => {
+
+
+app.get('/apiOLD/:date?', (req, res) => {
   const { date } = req.params;
 
-  if( date == null)
+  if (date == null)
     return res;
 
   const parsedDate = isNaN(date) ? new Date(date) : new Date(parseInt(date, 10));
-  if(!isNaN(parsedDate.getTime())){
+  if (!isNaN(parsedDate.getTime())) {
     res.json({
       unix: parsedDate.getTime(),
       utc: parsedDate.toUTCString(),
-    })
+    });
   } else {
-    res.json({ error: 'Invalid Date'});
+    res.json({ error: 'Invalid Date' });
   }
-})
+});
 
+
+// // listen for requests :)
+// var listener = app.listen(process.env.PORT, function() {
+//   console.log('Your app is listening on port ' + listener.address().port);
+// });
 
 // Listen on port set in environment variable or default to 3000
 var listener = app.listen(process.env.PORT || 3000, function () {
